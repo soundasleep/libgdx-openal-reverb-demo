@@ -72,16 +72,23 @@ public class ReverbOpenALAudio extends OpenALLwjgl3Audio {
 	public static final Reverb REVERB_LARGE = new Reverb(4.142F, 0.5F, 1.0F, 0.4F, 0.89F, 0.7F, 0.0F, 0.025F, 1.26F,
 			0.021F, 0.944F, 0.11F);
 
+	/*
+	 * I think each of these reverbs are being played simulateously, because
+	 * we are init'ing each of them as four effect slots (in the constructor).
+	 */	
 	public static final Reverb[] REVERBS = { REVERB_SMALL, REVERB_MEDIUM, REVERB_BIG, REVERB_LARGE };
+	//public static final Reverb[] REVERBS = { REVERB_LARGE };
+
+	private static final int REVERBS_TO_INIT = REVERBS.length;
 
 	private int directFilter;
 
 	public boolean isReverbAvailable = false;
-
+	
 	public ReverbOpenALAudio(int simultaneousSources, int deviceBufferCount, int deviceBufferSize) {
 		super(simultaneousSources, deviceBufferCount, deviceBufferSize);
 
-		instance = this; // what the fuck is this terrible singleton logic
+		instance = this; // wtf is this terrible singleton logic
 		isReverbAvailable = false;
 
 		/*
@@ -94,18 +101,18 @@ public class ReverbOpenALAudio extends OpenALLwjgl3Audio {
 		if (!EFXUtil.isFilterSupported(AL_FILTER_LOWPASS))
 			return;
 
-		auxSlots = BufferUtils.newIntBuffer(4);
-		for (int i = 0; i < 4; i++) // meh... for some reason alGenAuxiliaryEffectSlots(auxSlots) working
+		auxSlots = BufferUtils.newIntBuffer(REVERBS_TO_INIT);
+		for (int i = 0; i < REVERBS_TO_INIT; i++) // meh... for some reason alGenAuxiliaryEffectSlots(auxSlots) working
 									// incorrectly here
 			auxSlots.put(i, alGenAuxiliaryEffectSlots());
 
-		effects = BufferUtils.newIntBuffer(4);
+		effects = BufferUtils.newIntBuffer(REVERBS_TO_INIT);
 		alGenEffects(effects);
 
-		filters = BufferUtils.newIntBuffer(4);
+		filters = BufferUtils.newIntBuffer(REVERBS_TO_INIT);
 		alGenFilters(filters);
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < REVERBS_TO_INIT; i++) {
 			alEffecti(effects.get(i), AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
 			alFilteri(filters.get(i), AL_FILTER_TYPE, AL_FILTER_LOWPASS);
 			applyReverb(REVERBS[i], auxSlots.get(i), effects.get(i));
@@ -171,9 +178,11 @@ public class ReverbOpenALAudio extends OpenALLwjgl3Audio {
 
 	public void applySourceSettings(int sourceId, float[] sendGain, float[] sendCutoff, float directCutoff,
 			float directGain) {
-		if (!isReverbAvailable)
+		if (!isReverbAvailable) {
+			System.out.println("reverb not available");
 			return;
-		for (int i = 0; i < 4; i++) {
+		}
+		for (int i = 0; i < REVERBS_TO_INIT; i++) {
 			alFilterf(filters.get(i), AL_LOWPASS_GAIN, sendGain[i]);
 			alFilterf(filters.get(i), AL_LOWPASS_GAINHF, sendCutoff[i]);
 			AL11.alSource3i(sourceId, AL_AUXILIARY_SEND_FILTER, auxSlots.get(i), i, filters.get(i));
