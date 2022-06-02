@@ -1,6 +1,8 @@
 # libgdx-openal-reverb-demo
 
-Demo showing OpenAL reverb working with libgdx and lwjgl3.
+Demo showing OpenAL reverb working with libgdx and lwjgl3,
+based on example code from [abvadabra/libgdx-audio-effects](https://github.com/abvadabra/libgdx-audio-effects)
+and [LWJGL/lwjgl3](https://github.com/LWJGL/lwjgl3/).
 
 # FAQ
 
