@@ -43,6 +43,7 @@ public class OpenALDemoApplication extends ApplicationAdapter {
 
 	private int reverbPower = 100;
 	private int cutoff = 100;
+	private int directGain = 100;
 
 	@Override
 	public void create() {
@@ -67,8 +68,9 @@ public class OpenALDemoApplication extends ApplicationAdapter {
 		super.render();
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		batch.begin();
-		font.draw(batch, "Reverb power: " + (reverbPower) + "% (Use Up/Down to change)", 100, 100);
+		font.draw(batch, "Reverb power (wet): " + (reverbPower) + "% (Use Up/Down to change)", 100, 100);
 		font.draw(batch, "Low Pass Cutoff: " + (cutoff) + "% (Use Left/Right to change)", 100, 140);
+		font.draw(batch, "Direct gain (dry): " + (directGain) + "% (Use A/D to change)", 100, 180);
 		batch.end();
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.UP))
@@ -79,11 +81,15 @@ public class OpenALDemoApplication extends ApplicationAdapter {
 			cutoff = Math.min(100, cutoff + 5);
 		if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT))
 			cutoff = Math.max(0, cutoff - 5);
+		if (Gdx.input.isKeyJustPressed(Input.Keys.A))
+			directGain = Math.max(0, directGain - 5);
+		if (Gdx.input.isKeyJustPressed(Input.Keys.D))
+			directGain = Math.min(100, directGain + 5);
 
-		if (updateTick++ % 40 == 0) {
+		if (updateTick++ % 100 == 0) {
 			ReverbSound stepSound = stepSounds[rand.nextInt(stepSounds.length)];
-			stepSound.setSettings(reverbPower / 100F, cutoff / 100F);
-			stepSound.play(0.5F);
+			stepSound.setSettings(reverbPower / 100F, cutoff / 100F, directGain / 100f);
+			stepSound.play(0.5f); // volume also affects reverb
 		}
 	}
 }
