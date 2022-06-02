@@ -18,6 +18,10 @@ an actual working demo.
 
 I've only tested it on Windows.
 
+- libgdx 1.10.0
+- lwjgl 3.2.3
+- Java 16
+
 ## What does it look like when it's working?
 
 ![screenshot](screenshot.png)
